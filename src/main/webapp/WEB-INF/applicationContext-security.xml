@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans 
+    xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+	http://www.springframework.org/schema/security
+	http://www.springframework.org/schema/security/spring-security-3.1.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+    <context:property-placeholder location="classpath*:calllog*.properties,file:/usr/local/etc/calllog*.properties,file:///C:/Program Files/Apache Software Foundation/Tomcat 6.0/conf/calllog.properties"/>
+	<beans:bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+
+		<beans:property name="url" value="${database.url}" />
+		<beans:property name="driverClassName" value="${database.driverClassName}" />
+		<beans:property name="username" value="${database.username}" />
+		<beans:property name="password" value="${database.password}" />
+
+		<beans:property name="initialSize" value="10" />
+		<beans:property name="maxActive" value="100" />
+		<beans:property name="maxIdle" value="20" />
+		<beans:property name="maxWait" value="20000" />
+		<beans:property name="minIdle" value="10" />
+		<beans:property name="defaultAutoCommit" value="true" />
+		<beans:property name="testOnBorrow" value="true" />
+		<beans:property name="testOnReturn" value="true" />
+		<beans:property name="testWhileIdle" value="true" />
+		<beans:property name="timeBetweenEvictionRunsMillis"
+			value="10000" />
+	</beans:bean>
+
+	<global-method-security secured-annotations="enabled">
+	</global-method-security>
+
+   <http auto-config="true" access-denied-page="/accessDenied.jsp" use-expressions="true">
+		<intercept-url pattern="/login" access="permitAll" />
+		<intercept-url pattern="/resources/**" access="permitAll" />
+		<intercept-url pattern="/" access="isAuthenticated()" />
+		<intercept-url pattern="/create" access="isAuthenticated()" />
+		<intercept-url pattern="/home" access="isAuthenticated()" />
+		<intercept-url pattern="/edit" access="isAuthenticated()" />
+        <form-login login-processing-url="/j_spring_security_check" login-page="/login" authentication-failure-url="/login?login_error=t" default-target-url="/" always-use-default-target="false" />
+        <logout logout-url="/j_spring_security_logout"
+			invalidate-session="true" success-handler-ref="myLogoutSuccessHandler" />
+    </http>
+
+	<authentication-manager>
+		<authentication-provider>
+			<jdbc-user-service data-source-ref="dataSource"
+				users-by-username-query="select username,password, enabled from volunteer where username=?"
+				authorities-by-username-query="select username,role from volunteer where username=?" />
+		</authentication-provider>
+	</authentication-manager>
+
+	<beans:bean id="myLogoutSuccessHandler" class="com.slalom.calllog.MyLogoutSuccessHandler">
+		<beans:property name="defaultTargetUrl" value="/" />
+		<beans:property name="alwaysUseDefaultTargetUrl" value="true" />
+	</beans:bean>
+
+</beans:beans>
