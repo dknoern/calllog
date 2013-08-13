@@ -7,8 +7,8 @@
 <c:if test="${not empty param.login_error}">
     <font color="red">
         Your login attempt was not successful, try again.<br/>
-        Reason: <c:out value="${SPRING_SECURITY_LAST_EXCEPTION.message}"/>.<P>
-    </font>
+        Reason: <c:out value="${SPRING_SECURITY_LAST_EXCEPTION.message}"/>.
+    </font><p>
 </c:if>
 
 <form name="f" action="<c:url value='j_spring_security_check'/>" method="POST">
